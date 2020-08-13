@@ -1,45 +1,935 @@
 <!DOCTYPE html>
-<!--
-Copyright 2018 The Go Authors. All rights reserved.
-Use of this source code is governed by a BSD-style
-license that can be found in the LICENSE file.
--->
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <title>Go wasm</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>바카라 연구소-대규모 시뮬레이터</title>
+    <!-- <link rel="stylesheet" href="/stylesheets/large.css" type="text/css" /> -->
+    <script
+      src="https://kit.fontawesome.com/c9ed67d4b5.js"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"
+      integrity="sha512-s+xg36jbIujB2S2VKfpGmlC3T5V2TF3lY48DX7u2r9XzGzgPsa6wTpOQA7J9iffvdeBN0q9tKzRxVxw1JviZPg=="
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      :root {
+        --text-color: #f0f4f5;
+        --accent-color: #d49466;
+        --background-color: #263343;
+        --text-color-detail: #7792b1;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      /* .full-height {
+        height: 100%;
+        background: yellow;
+      } */
+
+      .grid-container {
+        height: 100%;
+        display: grid;
+        grid-template-columns: 260px auto;
+      }
+
+      nav {
+        /* width: 260px; */
+        height: 100%;
+        background-color: #272e48;
+        display: grid;
+        grid-template-rows: 61px auto;
+      }
+
+      .navbar_header {
+        border-right: 1px solid rgba(72, 94, 144, 0.16);
+        border-bottom: 1px solid rgba(72, 94, 144, 0.16);
+      }
+
+      .navbar_header {
+        font-size: 24px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .navbar_header i {
+        height: 24px;
+        /* color: var(--accent-color); */
+        color: var(--text-color);
+        margin: 18px 10px 18px -10px;
+      }
+
+      .navbar_header a {
+        text-decoration: none;
+        color: var(--text-color);
+        margin: 11px 0px 18px 10px;
+        font-family: 'Oswald', sans-serif;
+      }
+
+      .menu {
+        padding: 20px;
+      }
+
+      .menu ul {
+        list-style-type: none;
+      }
+
+      .menu ul li {
+        width: 100%;
+        height: 40px;
+        opacity: 0.5;
+      }
+
+      .menu ul li:hover {
+        opacity: 1;
+      }
+
+      .menu ul li a {
+        text-decoration: none;
+        color: var(--text-color);
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .menu_item_left i {
+        font-size: 15px;
+        margin-right: 10px;
+      }
+
+      .menu_item_left span {
+        font-size: 15px;
+      }
+
+      .fa-angle-right {
+        font-size: 15px;
+      }
+
+      .contents {
+        height: auto;
+        padding: 10px;
+        background-color: #f4f5f9;
+        overflow-y: scroll;
+      }
+
+      .control {
+        height: 100px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0px 2px 5px 0px rgba(19, 23, 38, 0.05);
+        display: flex;
+        align-items: center;
+      }
+
+      .input-title {
+        width: 400px;
+        height: 100%;
+        border-right: 1px solid rgba(72, 94, 144, 0.16);
+        color: #475f7b;
+        font-size: 30px;
+        font-weight: 700;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 100px;
+        font-family: 'Noto Sans KR', sans-serif;
+      }
+
+      .input-group {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .input-group input {
+        width: 330px;
+        height: 35px;
+        background-color: #f2f4f4;
+        color: #475f7b;
+        font-size: 16px;
+        padding-left: 20px;
+        border: none;
+        border-radius: 5px;
+        outline: none;
+      }
+
+      .input-group button {
+        width: 35px;
+        height: 35px;
+        border: 0;
+        background: none;
+        color: #475f7b;
+        /* font-weight: 700; */
+        font-size: 20px;
+        outline: none;
+      }
+
+      .result {
+        width: 100%;
+        height: auto;
+        margin-top: 10px;
+      }
+
+      .total-container {
+        height: 361px;
+        display: flex;
+      }
+
+      .total-container > div {
+        width: 50%;
+        height: 100%;
+      }
+
+      .total {
+        margin-right: 5px;
+        border-radius: 5px;
+        background-color: #fff;
+      }
+
+      .total-title {
+        width: 91%;
+        height: 60px;
+        border-bottom: 1px solid rgba(72, 94, 144, 0.16);
+        padding: 21px;
+        color: #475f7b;
+        font-size: 20px;
+        line-height: 60px;
+        vertical-align: middle;
+        font-family: 'Noto Sans KR', sans-serif;
+        font-weight: 500;
+      }
+
+      .total-chart-container {
+        width: 100%;
+        height: 300px;
+      }
+
+      #total-chart {
+        width: 100%;
+        height: 100%;
+        margin-top: 10px;
+      }
+
+      .total-detail {
+        margin-left: 5px;
+        margin-right: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .detail {
+        width: 100%;
+        height: 25%;
+        background-color: #fff;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: row;
+        padding: 20px;
+      }
+
+      .detail > div {
+        width: 33.3%;
+        height: 100%;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 72px;
+        color: var(--text-color-detail);
+      }
+
+      .detail.players {
+        margin: 0 0 5px 0;
+      }
+
+      .detail.bankers {
+        margin: 5px 0;
+      }
+
+      .detail.ties {
+        margin: 5px 0;
+      }
+
+      .detail.banker6 {
+        margin: 5px 0 0 0;
+      }
+
+      .detail-item {
+        font-size: 18px;
+      }
+
+      .detail-num {
+        font-size: 35px;
+      }
+
+      .total-layer2 {
+        display: flex;
+        flex-direction: row;
+      }
+      .detail.banker6 {
+        width: 35%;
+        height: 200px;
+        margin-top: 10px;
+      }
+
+      #super6-chart {
+        width: 100%;
+        height: 100%;
+        margin-top: 10px;
+      }
+
+      .banker6detail {
+        width: 60%;
+        height: 200px;
+        margin: 10px 0 0 10px;
+        padding: 20px;
+        border-radius: 5px;
+        background-color: #fff;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .banker6box {
+        width: 33.3%;
+        height: 50%;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 100px;
+        color: var(--text-color-detail);
+        font-size: 19px;
+      }
+
+      .total-layer3 {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+      }
+
+      .detail.lines {
+        width: 70%;
+        height: auto;
+        min-height: 300px;
+        margin: 10px 5px 0 0;
+        padding: 20px;
+        border-radius: 5px;
+      }
+
+      #lines-chart {
+        width: 100%;
+        height: 100%;
+      }
+
+      .lines_list {
+        width: 30%;
+        height: auto;
+        min-height: 300px;
+        margin: 10px 0 0 5px;
+        padding: 20px;
+        border-radius: 5px;
+        background-color: #fff;
+      }
+
+      .linesDetailLi {
+        display: flex;
+        flex-direction: row;
+        border-bottom: 1px solid rgba(72, 94, 144, 0.16);
+      }
+
+      .linesDetailLi > div {
+        text-align: center;
+        vertical-align: middle;
+        color: var(--text-color-detail);
+      }
+
+      .column1 {
+        width: 16%;
+      }
+
+      .column2 {
+        width: 42%;
+      }
+
+      .column3 {
+        width: 42%;
+      }
+
+      #progress {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        opacity: 0.5;
+        color: #ffffff;
+        font-size: 40px;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 200px;
+        /* overflow: break-word; */
+      }
+    </style>
   </head>
-
   <body>
-    <script src="wasm_exec.js"></script>
+    <div class="grid-container">
+      <nav>
+        <div class="navbar_header">
+          <i class="fas fa-microscope"></i>
+          <a href="/">Baccarat Lab</a>
+        </div>
+        <div class="menu">
+          <ul>
+            <li>
+              <a href="/largescale">
+                <div class="menu_item_left">
+                  <i class="fas fa-chart-bar"></i>
+                  <span>대규모 시뮬레이터</span>
+                </div>
+                <div class="menu_item_right">
+                  <i class="fas fa-angle-right"></i>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="/shoe">
+                <div class="menu_item_left">
+                  <i class="fas fa-chess-board"></i>
+                  <span>1슈 미리보기</span>
+                </div>
+                <div class="menu_item_right">
+                  <i class="fas fa-angle-right"></i>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="/system">
+                <div class="menu_item_left">
+                  <i class="fas fa-robot"></i>
+                  <span>시스템배팅 예측</span>
+                </div>
+                <div class="menu_item_right">
+                  <i class="fas fa-angle-right"></i>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="/asian">
+                <div class="menu_item_left">
+                  <i class="fas fa-won-sign"></i>
+                  <span>아시안커넥트</span>
+                </div>
+                <div class="menu_item_right">
+                  <i class="fas fa-angle-right"></i>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="/moneyline">
+                <div class="menu_item_left">
+                  <i class="fas fa-hand-holding-usd"></i>
+                  <span>머니라인24/7</span>
+                </div>
+                <div class="menu_item_right">
+                  <i class="fas fa-angle-right"></i>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <div class="contents">
+        <script src="wasm_exec.js"></script>
 
+        <script>
+          if (!WebAssembly.instantiateStreaming) {
+            // polyfill
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+              const source = await (await resp).arrayBuffer();
+              return await WebAssembly.instantiate(source, importObject);
+            };
+          }
+
+          const go = new Go();
+
+          let mod, inst;
+
+          WebAssembly.instantiateStreaming(
+            fetch('lib.wasm'),
+            go.importObject
+          ).then((result) => {
+            mod = result.module;
+            inst = result.instance;
+            document.getElementById('runButton').disabled = false;
+            document.getElementById('progress').style.display = 'none';
+          });
+
+          async function run() {
+            input = document.getElementById('loop');
+            if (isNaN(input.value) || input.value < 1 || input.value > 100000) {
+              input.value = '';
+              alert('1~100,000 사이의 숫자를 입력해 주세요.');
+              return;
+            }
+
+            document.getElementById('progress').innerHTML = '시뮬레이션중...';
+            document.getElementById('progress').style.display = 'block';
+            await new Promise((r) => setTimeout(r, 1));
+            await go.run(inst);
+            inst = await WebAssembly.instantiate(mod, go.importObject); // reset instance
+          }
+        </script>
+
+        <div class="control">
+          <div class="input-title">대규모 시뮬레이터</div>
+          <div class="input-group">
+            <input
+              type="text"
+              id="loop"
+              placeholder="시뮬레이션 횟수(슈) : 1~100,000의 숫자"
+            />
+            <button onClick="run();" id="runButton" disabled>
+              <i class="fas fa-play-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="result">
+          <div class="total-container">
+            <div class="total">
+              <div class="total-title"><span>총 계</span></div>
+              <div class="total-chart-container">
+                <canvas id="total-chart"></canvas>
+                <script>
+                  function roundFixRatio(num, total) {
+                    let ratio = (num / total) * 100;
+                    ratio = (Math.round(ratio * 100) / 100).toFixed(2);
+
+                    return ratio.toString();
+                  }
+
+                  function commaFormatted(amount) {
+                    var delimiter = ','; // replace comma if desired
+                    // var a = amount.split('.', 2);
+                    // var d = a[1];
+                    // var i = parseInt(a[0]);
+                    var i = amount;
+                    if (isNaN(i)) {
+                      return '';
+                    }
+                    var minus = '';
+                    if (i < 0) {
+                      minus = '-';
+                    }
+                    i = Math.abs(i);
+                    var n = new String(i);
+                    var a = [];
+                    while (n.length > 3) {
+                      var nn = n.substr(n.length - 3);
+                      a.unshift(nn);
+                      n = n.substr(0, n.length - 3);
+                    }
+                    if (n.length > 0) {
+                      a.unshift(n);
+                    }
+                    n = a.join(delimiter);
+                    // if (d.length < 1) {
+                    //   amount = n;
+                    // } else {
+                    //   amount = n + '.' + d;
+                    // }
+                    // amount = minus + amount;
+                    // return amount;
+                    return n;
+                  }
+
+                  function showResult(result) {
+                    var obj = JSON.parse(result);
+                    var ctx = document.getElementById('total-chart');
+                    data = {
+                      labels: ['플레이어', '뱅커', '타이'],
+                      datasets: [
+                        {
+                          label: '대규모 시뮬레이션 결과',
+                          data: [obj.players, obj.bankers, obj.ties],
+                          backgroundColor: [
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 99, 132)',
+                            'rgb(119, 221, 119)',
+                          ],
+                        },
+                      ],
+                    };
+
+                    var myPieChart = new Chart(ctx, {
+                      type: 'pie',
+                      data: data,
+                      options: null,
+                    });
+
+                    var total = obj.players + obj.bankers + obj.ties;
+                    // var ratio_player = (
+                    //   Math.round((obj.players / total) * 100 * 100) / 100
+                    // ).toFixed(2);
+                    var formattedPlayers = commaFormatted(
+                      obj.players.toString()
+                    );
+                    var formattedBankers = commaFormatted(
+                      obj.bankers.toString()
+                    );
+                    var formattedTies = commaFormatted(obj.ties.toString());
+
+                    var ratio_player = roundFixRatio(obj.players, total);
+                    var ratio_banker = roundFixRatio(obj.bankers, total);
+                    var ratio_tie = roundFixRatio(obj.ties, total);
+
+                    document.getElementById('detail-player-num').innerHTML =
+                      '<span>' + formattedPlayers + '</span>';
+                    document.getElementById('detail-player-ratio').innerHTML =
+                      '<span>' + ratio_player + '%</span>';
+
+                    document.getElementById('detail-banker-num').innerHTML =
+                      '<span>' + formattedBankers + '</span>';
+                    document.getElementById('detail-banker-ratio').innerHTML =
+                      '<span>' + ratio_banker + '%</span>';
+                    document.getElementById('detail-tie-num').innerHTML =
+                      '<span>' + formattedTies + '</span>';
+                    document.getElementById('detail-tie-ratio').innerHTML =
+                      '<span>' + ratio_tie + '%</span>';
+                    // '<ol><li>html data</li></ol>';
+                    showSuper6Chart(obj.bankers, obj.supersix);
+                    showLinesChart(obj.player_line, obj.banker_line);
+                    showBanker6Detail(obj.bankers, obj.supersix);
+
+                    document.getElementById('progress').style.display = 'none';
+                  }
+                </script>
+              </div>
+            </div>
+            <div class="total-detail">
+              <div class="detail players">
+                <div class="detail-item">플레이어</div>
+                <div class="detail-num" id="detail-player-num"></div>
+                <div class="detail-ratio" id="detail-player-ratio"></div>
+              </div>
+              <div class="detail bankers">
+                <div class="detail-item">뱅커</div>
+                <div class="detail-num" id="detail-banker-num"></div>
+                <div class="detail-ratio" id="detail-banker-ratio"></div>
+              </div>
+              <div class="detail ties">
+                <div class="detail-item">타이</div>
+                <div class="detail-num" id="detail-tie-num"></div>
+                <div class="detail-ratio" id="detail-tie-ratio"></div>
+              </div>
+            </div>
+          </div>
+          <div class="total-layer2">
+            <div class="detail banker6">
+              <canvas id="super6-chart"></canvas>
+              <script>
+                function showSuper6Chart(bankers, super6) {
+                  const data = [bankers, super6];
+                  var ctxSuper6 = document.getElementById('super6-chart');
+                  var dataSuper6 = {
+                    labels: ['뱅커', 'Super6'],
+                    datasets: [
+                      {
+                        label: 'Super6 비율',
+                        data: data,
+                        fill: true,
+                        backgroundColor: [
+                          'rgba(255, 99, 132, 0.2)',
+                          'rgba(255, 159, 64, 0.2)',
+                        ],
+                        borderColor: ['rgb(255, 99, 132)', 'rgb(255, 159, 64)'],
+                        borderWidth: 1,
+                      },
+                    ],
+                  };
+                  var optionsSuper6 = {
+                    scales: { xAxes: [{ ticks: { beginAtZero: true } }] },
+                  };
+                  var super6Chart = new Chart(ctxSuper6, {
+                    type: 'horizontalBar',
+                    data: dataSuper6,
+                    options: optionsSuper6,
+                  });
+                }
+              </script>
+            </div>
+            <div class="banker6detail">
+              <div class="banker6box">뱅커</div>
+              <div class="banker6box">Super6</div>
+              <div class="banker6box">비율</div>
+              <div class="banker6box" id="banker6_1"></div>
+              <div class="banker6box" id="banker6_2"></div>
+              <div class="banker6box" id="banker6_3"></div>
+            </div>
+            <script>
+              function showBanker6Detail(bankers, banker6) {
+                var formattedBankers = commaFormatted(bankers.toString());
+                var formattedBanker6 = commaFormatted(banker6.toString());
+                var ratio_player = roundFixRatio(banker6, bankers);
+
+                document.getElementById('banker6_1').innerHTML =
+                  '<span>' + formattedBankers + '</span>';
+                document.getElementById('banker6_2').innerHTML =
+                  '<span>' + formattedBanker6 + '</span>';
+                document.getElementById('banker6_3').innerHTML =
+                  '<span>' + ratio_player + '%</span>';
+              }
+            </script>
+          </div>
+          <div class="total-layer3">
+            <div class="detail lines">
+              <canvas id="lines-chart"></canvas>
+              <script>
+                var color = Chart.helpers.color;
+                var barChartData = {};
+
+                function makeLineData(keys, player_line) {
+                  var data = [];
+                  for (const key of keys) {
+                    if (player_line[key] != null) {
+                      data.push(player_line[key]);
+                    } else data.push(0);
+                  }
+
+                  return data;
+                }
+
+                function mergeArrays(...arrays) {
+                  let jointArray = [];
+
+                  arrays.forEach((array) => {
+                    jointArray = [...jointArray, ...array];
+                  });
+                  const uniqueArray = jointArray.filter(
+                    (item, index) => jointArray.indexOf(item) === index
+                  );
+                  return uniqueArray;
+                }
+
+                function setLinesChartData(player_line, banker_line) {
+                  // get labels
+                  const player_line_keys = Object.keys(player_line);
+                  const banker_line_keys = Object.keys(banker_line);
+                  const keys = mergeArrays(player_line_keys, banker_line_keys);
+                  const keyStringArray = [];
+                  for (const key of keys) {
+                    keyStringArray.push(key.toString());
+                  }
+
+                  // make Line data array
+                  const player_line_data = makeLineData(keys, player_line);
+                  const banker_line_data = makeLineData(keys, banker_line);
+
+                  barChartData = {
+                    labels: keyStringArray,
+                    datasets: [
+                      {
+                        label: '플레이어',
+                        backgroundColor: 'rgb(54, 162, 235)',
+                        borderWidth: 1,
+                        data: player_line_data,
+                      },
+                      {
+                        label: '뱅   커',
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderWidth: 1,
+                        data: banker_line_data,
+                      },
+                    ],
+                  };
+
+                  showLinesDetail(
+                    keyStringArray,
+                    player_line_data,
+                    banker_line_data
+                  );
+                }
+
+                function createElementSetAttributeToElement(
+                  element_name,
+                  attr,
+                  value
+                ) {
+                  var element = document.createElement(element_name);
+                  var newAttr = document.createAttribute(attr);
+                  newAttr.value = value;
+                  element.setAttributeNode(newAttr);
+                  return element;
+                }
+
+                function setAttributeToElement(el, attr, value) {
+                  var newAttr = document.createAttribute(attr);
+                  newAttr.value = value;
+                  el.setAttributeNode(newAttr);
+                  return el;
+                }
+
+                function addColumnTitle() {
+                  var li = createElementSetAttributeToElement(
+                    'li',
+                    'class',
+                    'linesDetailLi'
+                  );
+
+                  var column1 = createElementSetAttributeToElement(
+                    'div',
+                    'class',
+                    'column1'
+                  );
+
+                  column1 = setAttributeToElement(column1, 'class', 'column1');
+                  column1.innerHTML = '라인';
+                  li.appendChild(column1);
+
+                  var column2 = createElementSetAttributeToElement(
+                    'div',
+                    'class',
+                    'column2'
+                  );
+                  column2 = setAttributeToElement(column2, 'class', 'column2');
+                  column2.innerHTML = '플레이어';
+                  li.appendChild(column2);
+
+                  var column3 = createElementSetAttributeToElement(
+                    'div',
+                    'class',
+                    'column3'
+                  );
+                  column3 = setAttributeToElement(column3, 'class', 'column3');
+                  column3.innerHTML = '뱅   커';
+                  li.appendChild(column3);
+
+                  var ul = document.getElementById('lines_detail');
+                  ul.appendChild(li);
+                }
+
+                function showLinesDetail(lines, player_line, banker_line) {
+                  var ul = document.getElementById('lines_detail');
+                  // remove previous data
+                  ul.innerHTML = '';
+
+                  addColumnTitle();
+
+                  var i = 0;
+                  lines.forEach((line) => {
+                    var li = createElementSetAttributeToElement(
+                      'li',
+                      'class',
+                      'linesDetailLi'
+                    );
+
+                    var column1 = createElementSetAttributeToElement(
+                      'div',
+                      'class',
+                      'column1'
+                    );
+                    column1 = setAttributeToElement(
+                      column1,
+                      'class',
+                      'column1'
+                    );
+                    column1.innerHTML = line;
+                    li.appendChild(column1);
+
+                    var column2 = createElementSetAttributeToElement(
+                      'div',
+                      'class',
+                      'column2'
+                    );
+                    column2 = setAttributeToElement(
+                      column2,
+                      'class',
+                      'column2'
+                    );
+                    column2.innerHTML = commaFormatted(
+                      player_line[i].toString()
+                    );
+                    li.appendChild(column2);
+
+                    var column3 = createElementSetAttributeToElement(
+                      'div',
+                      'class',
+                      'column3'
+                    );
+                    column3 = setAttributeToElement(
+                      column3,
+                      'class',
+                      'column3'
+                    );
+
+                    column3.innerHTML = commaFormatted(
+                      banker_line[i].toString()
+                    );
+                    li.appendChild(column3);
+
+                    // var ul = document.getElementById('lines_detail');
+                    ul.appendChild(li);
+
+                    i++;
+                  });
+                }
+
+                function showLinesChart(player_line, banker_line) {
+                  setLinesChartData(player_line, banker_line);
+
+                  var ctxLinesChart = document.getElementById('lines-chart');
+                  var myBar = new Chart(ctxLinesChart, {
+                    type: 'bar',
+                    data: barChartData,
+                    options: {
+                      responsive: false,
+                      legend: {
+                        position: 'top',
+                      },
+                      title: {
+                        display: true,
+                        text: '라인 보기',
+                      },
+                    },
+                  });
+                }
+              </script>
+            </div>
+            <div class="lines_list">
+              <ul id="lines_detail"></ul>
+              <script></script>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="progress"></div>
     <script>
-      if (!WebAssembly.instantiateStreaming) {
-        // polyfill
-        WebAssembly.instantiateStreaming = async (resp, importObject) => {
-          const source = await (await resp).arrayBuffer();
-          return await WebAssembly.instantiate(source, importObject);
-        };
-      }
-
-      const go = new Go();
-
-      let mod, inst;
-
-      WebAssembly.instantiateStreaming(fetch('lib.wasm'), go.importObject).then(
-        (result) => {
-          mod = result.module;
-          inst = result.instance;
-          document.getElementById('runButton').disabled = false;
-        }
-      );
-
-      async function run() {
-        await go.run(inst);
-        inst = await WebAssembly.instantiate(mod, go.importObject); // reset instance
-      }
+      var info =
+        '<p>시뮬레이터를 다운 받고 있는 중입니다.</p><p>최초 1회에 한하여 시간(10초~5분)이 걸릴 수 있습니다.</p><p>여유를 가지고 기다려 주세요.</p>';
+      document.getElementById('progress').innerHTML = info;
+      document.getElementById('progress').style.display = 'block';
     </script>
-
-    <button onClick="run();" id="runButton" disabled>Run</button>
   </body>
 </html>
